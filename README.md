@@ -44,7 +44,7 @@ The game ends when the sphere collides with an obstacle, triggering an explosion
 ## How to Run
 Execute the game script using Python:
 ```bash
-python galaxy_road_game.py
+python draw_sphere.py
 ```
 
 ## File Structure
