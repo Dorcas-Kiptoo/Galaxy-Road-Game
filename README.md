@@ -1,7 +1,7 @@
 # Galaxy Road Game
 
 ## Description
-**Galaxy Road Game** is an interactive Python game built using Pygame. Navigate a sphere through a galaxy-themed road while avoiding skull obstacles. The game features a dynamic background, immersive audio effects, and a visually engaging experience with a gradual day-night cycle.
+**Galaxy Road Game** is an interactive Python game built using Pygame. Navigate a sphere through a galaxy-themed road while avoiding skull obstacles. The game features a dynamic background, immersive audio effects, and a galaxy themed background.
 
 ## Features.
 - Galaxy-themed background with star animations.
