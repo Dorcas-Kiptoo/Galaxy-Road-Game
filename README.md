@@ -29,7 +29,7 @@ The game ends when the sphere collides with an obstacle, triggering an explosion
 ### Steps
 1. **Clone or Download the Repository**:
    ```bash
-   git clone https://github.com/Dorcas-Kiptoo/Group4.git
+   git clone https://github.com/Dorcas-Kiptoo/Galaxy-Road-Game.git
    cd galaxy-road-game
    ```
 2. **Install Pygame**:
