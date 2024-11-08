@@ -3,8 +3,9 @@ import sys
 import random
 import math
 
-# Initialize Pygame
+# Initialize Pygame and the mixer
 pygame.init()
+pygame.mixer.init()
 
 # Screen dimensions
 WIDTH, HEIGHT = 600, 600
@@ -13,7 +14,6 @@ pygame.display.set_caption("Galaxy Road Game")
 
 # Colors
 ROAD_COLOR = (60, 60, 70)
-OBSTACLE_COLOR = (200, 0, 0)
 TEXT_COLOR = (255, 255, 255)
 
 # Sphere properties
@@ -44,6 +44,26 @@ frames_since_last_obstacle = 0
 # Background Star positions for galaxy effect
 star_positions = [(random.randint(0, WIDTH), random.randint(0, HEIGHT)) for _ in range(100)]
 
+# Load skull image for obstacles
+skull_image = pygame.image.load("skull.png")
+skull_image = pygame.transform.scale(skull_image, (obstacle_width, obstacle_height))
+
+# Define lanes for balanced obstacle positioning
+lane_width = WIDTH // 3  # Width of each lane
+road_start_x = WIDTH // 3  # Start of the road section
+lane_positions = [
+    road_start_x + lane_width // 6 - obstacle_width // 2,  # Left lane
+    road_start_x + lane_width // 2 - obstacle_width // 2,  # Center lane
+    road_start_x + 5 * lane_width // 6 - obstacle_width // 2  # Right lane
+]
+
+# Load sounds
+background_music = r"C:\Users\Admin\Downloads\music.mp3"  # Path to your background music
+explosion_sound = pygame.mixer.Sound(r"C:\Users\Admin\Downloads\explosion.wav")  # Path to your explosion sound
+
+# Play background music (looping)
+pygame.mixer.music.load(background_music)
+pygame.mixer.music.play(-1)  # Loop indefinitely
 
 def draw_background():
     # Galaxy-like gradient background
@@ -70,15 +90,15 @@ def draw_sphere(x, y, radius):
 
 
 def draw_road():
-    pygame.draw.rect(screen, ROAD_COLOR, (WIDTH // 3, 0, WIDTH // 3, HEIGHT))
+    pygame.draw.rect(screen, ROAD_COLOR, (WIDTH // 3 - 10, 0, WIDTH // 3 + 20, HEIGHT))
     pygame.draw.line(screen, (255, 255, 255), (WIDTH // 3, 0), (WIDTH // 3, HEIGHT), 5)
     pygame.draw.line(screen, (255, 255, 255), (2 * WIDTH // 3, 0), (2 * WIDTH // 3, HEIGHT), 5)
 
 
 def spawn_obstacle():
-    # Randomly choose a position in either lane
-    lane_x = random.choice([WIDTH // 3 + obstacle_width, 2 * WIDTH // 3 - obstacle_width])
-    obstacles.append([lane_x, -obstacle_height])
+    # Randomly choose a lane for the obstacle (left, center, or right)
+    lane_x = random.choice(lane_positions)
+    obstacles.append([lane_x, -obstacle_height])  # Start the obstacle at the top off-screen
 
 
 def move_obstacles():
@@ -95,17 +115,22 @@ def move_obstacles():
 
 def draw_obstacles():
     for obstacle in obstacles:
-        pygame.draw.rect(screen, OBSTACLE_COLOR, (*obstacle, obstacle_width, obstacle_height))
+        # Draw each obstacle as a skull image
+        screen.blit(skull_image, (obstacle[0], obstacle[1]))
 
+collision_detected = False  # Track if collision has been detected
 
 def detect_collision():
-    global game_over, explosion_growing
+    global game_over, explosion_growing, collision_detected
     sphere_rect = pygame.Rect(sphere_x - sphere_radius, sphere_y - sphere_radius, sphere_radius * 2, sphere_radius * 2)
     for obstacle in obstacles:
         obstacle_rect = pygame.Rect(obstacle[0], obstacle[1], obstacle_width, obstacle_height)
         if sphere_rect.colliderect(obstacle_rect):
             game_over = True
             explosion_growing = True
+            if not collision_detected:  # Play sound only on first collision
+                explosion_sound.play()
+                collision_detected = True
             return
 
 
@@ -122,6 +147,11 @@ def draw_score():
     score_text = font_small.render("Score: " + str(score), True, TEXT_COLOR)
     screen.blit(score_text, (10, 10))
 
+# Load the game over sound
+game_over_sound = pygame.mixer.Sound(r"C:\Users\Admin\Downloads\game_over.mp3")
+
+# Add this variable to manage if the game over sound has been played
+game_over_sound_played = False
 
 # Main game loop
 clock = pygame.time.Clock()
@@ -130,6 +160,14 @@ while True:
     draw_road()
 
     if game_over:
+        # Stop background music if it hasn't already been stopped
+        pygame.mixer.music.stop()
+
+        # Play game over sound only once
+        if not game_over_sound_played:
+            game_over_sound.play()
+            game_over_sound_played = True
+
         explode()
         screen.blit(game_over_text,
                     (WIDTH // 2 - game_over_text.get_width() // 2, HEIGHT // 2 - game_over_text.get_height() // 2))
