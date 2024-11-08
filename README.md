@@ -54,7 +54,7 @@ galaxy-road-game/
 ├── galaxy_road_game.py                    # Main game script
 ├── skull.png                              # Skull image for obstacles
 ├── music.mp3                              # Background music file
-└── Monster battle_audio_explosion.wav     # Explosion sound effect
+└── explosion.wav                          # Explosion sound effect
 |__ game_over.mp3                          #Game over sound effect
 ```
 
