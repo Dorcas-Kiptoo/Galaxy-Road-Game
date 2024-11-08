@@ -59,9 +59,9 @@ lane_positions = [
 ]
 
 # Load sounds
-background_music = r"C:\Users\Admin\Downloads\music.mp3"
-explosion_sound = pygame.mixer.Sound(r"C:\Users\Admin\Downloads\explosion.wav")
-game_over_sound = pygame.mixer.Sound(r"C:\Users\Admin\Downloads\game_over.mp3")
+background_music = "music.mp3"
+explosion_sound = pygame.mixer.Sound("explosion.wav")
+game_over_sound = pygame.mixer.Sound("game_over.mp3")
 
 # Play background music (looping)
 pygame.mixer.music.load(background_music)
