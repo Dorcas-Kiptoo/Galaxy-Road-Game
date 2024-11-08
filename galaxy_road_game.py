@@ -1,3 +1,4 @@
+
 import pygame
 import sys
 import random
@@ -58,9 +59,9 @@ lane_positions = [
 ]
 
 # Load sounds
-background_music = "music.mp3"
-explosion_sound = pygame.mixer.Sound("explosion.wav")
-game_over_sound = pygame.mixer.Sound("game_over.mp3")
+background_music = r"C:\Users\Admin\Downloads\music.mp3"
+explosion_sound = pygame.mixer.Sound(r"C:\Users\Admin\Downloads\explosion.wav")
+game_over_sound = pygame.mixer.Sound(r"C:\Users\Admin\Downloads\game_over.mp3")
 
 # Play background music (looping)
 pygame.mixer.music.load(background_music)
@@ -187,14 +188,17 @@ def explode():
         pygame.draw.circle(screen, (255, 100, 100), (sphere_x, sphere_y), explosion_radius)
 
 
+
+font_score = pygame.font.Font(None, 28)  # Smaller font size for compact score display
+
 def draw_score():
-    # Display current score
-    score_text = font_small.render("Score: " + str(score), True, TEXT_COLOR)
+
+    score_text = font_score.render("Score: " + str(score).zfill(6), True, TEXT_COLOR)
     screen.blit(score_text, (10, 10))
 
-    # Display highest score
-    highest_score_text = font_small.render("Highest Score: " + str(highest_score), True, TEXT_COLOR)
+    highest_score_text = font_score.render("Highest: " + str(highest_score).zfill(6), True, TEXT_COLOR)
     screen.blit(highest_score_text, (10, 50))  # Display below the current score
+
 
 
 # Main game loop
