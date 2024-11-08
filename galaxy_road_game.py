@@ -1,7 +1,6 @@
 import pygame
 import sys
 import random
-import math
 
 # Initialize Pygame and the mixer
 pygame.init()
@@ -60,13 +59,44 @@ lane_positions = [
 # Load sounds
 background_music = r"C:\Users\Admin\Downloads\music.mp3"  # Path to your background music
 explosion_sound = pygame.mixer.Sound(r"C:\Users\Admin\Downloads\explosion.wav")  # Path to your explosion sound
+game_over_sound = pygame.mixer.Sound(r"C:\Users\Admin\Downloads\game_over.mp3")  # Game over sound
 
 # Play background music (looping)
 pygame.mixer.music.load(background_music)
 pygame.mixer.music.play(-1)  # Loop indefinitely
 
+# Function to reset the game state
+def reset_game():
+    global sphere_x, sphere_y, obstacles, score, game_over, explosion_radius, explosion_growing, collision_detected, game_over_sound_played
+    sphere_x, sphere_y = WIDTH // 2, HEIGHT - 100
+    obstacles = []
+    score = 0
+    game_over = False
+    explosion_radius = 0
+    explosion_growing = False
+    collision_detected = False
+    game_over_sound_played = False
+    pygame.mixer.music.play(-1)  # Restart background music
+
+# Function to display Game Over screen with score and Play Again button
+def show_game_over_screen():
+    screen.blit(game_over_text, (WIDTH // 2 - game_over_text.get_width() // 2, HEIGHT // 2 - 100))
+    score_text = font_small.render(f"Your Score: {score}", True, TEXT_COLOR)
+    screen.blit(score_text, (WIDTH // 2 - score_text.get_width() // 2, HEIGHT // 2))
+    
+    # Draw Play Again button
+    play_again_text = font_small.render("Play Again", True, TEXT_COLOR)
+    play_again_rect = play_again_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
+    pygame.draw.rect(screen, (0, 150, 0), play_again_rect.inflate(20, 10))
+    screen.blit(play_again_text, play_again_rect)
+
+    # Check for mouse click on Play Again button
+    mouse_pos = pygame.mouse.get_pos()
+    mouse_click = pygame.mouse.get_pressed()
+    if play_again_rect.collidepoint(mouse_pos) and mouse_click[0]:
+        reset_game()
+
 def draw_background():
-    # Galaxy-like gradient background
     for i in range(HEIGHT):
         gradient_color = (
             max(10, 30 + i // 10),
@@ -74,52 +104,39 @@ def draw_background():
             max(20, 50 + i // 15)
         )
         pygame.draw.line(screen, gradient_color, (0, i), (WIDTH, i))
-
-    # Draw stars for galaxy effect
     for pos in star_positions:
         pygame.draw.circle(screen, (255, 255, 255), pos, random.choice([1, 2]))
 
-
 def draw_sphere(x, y, radius):
-    # Rough texture using a series of layered circles with random offsets
     for i in range(radius, 0, -2):
         offset_x = random.randint(-2, 2)
         offset_y = random.randint(-2, 2)
         color = (255 - int(i * 2.5), 255 - int(i * 2.5), 255 - int(i * 2.5))
         pygame.draw.circle(screen, color, (x + offset_x, y + offset_y), i)
 
-
 def draw_road():
     pygame.draw.rect(screen, ROAD_COLOR, (WIDTH // 3 - 10, 0, WIDTH // 3 + 20, HEIGHT))
     pygame.draw.line(screen, (255, 255, 255), (WIDTH // 3, 0), (WIDTH // 3, HEIGHT), 5)
     pygame.draw.line(screen, (255, 255, 255), (2 * WIDTH // 3, 0), (2 * WIDTH // 3, HEIGHT), 5)
 
-
 def spawn_obstacle():
-    # Randomly choose a lane for the obstacle (left, center, or right)
     lane_x = random.choice(lane_positions)
-    obstacles.append([lane_x, -obstacle_height])  # Start the obstacle at the top off-screen
-
+    obstacles.append([lane_x, -obstacle_height])
 
 def move_obstacles():
     global score, obstacles
     for obstacle in obstacles:
         obstacle[1] += obstacle_speed
-
-    # Remove obstacles that go off-screen and update score
     obstacles = [obs for obs in obstacles if obs[1] < HEIGHT]
     for obstacle in obstacles:
         if obstacle[1] > sphere_y + sphere_radius and not game_over:
             score += 1
 
-
 def draw_obstacles():
     for obstacle in obstacles:
-        # Draw each obstacle as a skull image
         screen.blit(skull_image, (obstacle[0], obstacle[1]))
 
-collision_detected = False  # Track if collision has been detected
-
+collision_detected = False
 def detect_collision():
     global game_over, explosion_growing, collision_detected
     sphere_rect = pygame.Rect(sphere_x - sphere_radius, sphere_y - sphere_radius, sphere_radius * 2, sphere_radius * 2)
@@ -128,11 +145,10 @@ def detect_collision():
         if sphere_rect.colliderect(obstacle_rect):
             game_over = True
             explosion_growing = True
-            if not collision_detected:  # Play sound only on first collision
+            if not collision_detected:
                 explosion_sound.play()
                 collision_detected = True
             return
-
 
 def explode():
     global explosion_radius, explosion_growing
@@ -142,38 +158,26 @@ def explode():
             explosion_growing = False
         pygame.draw.circle(screen, (255, 100, 100), (sphere_x, sphere_y), explosion_radius)
 
-
 def draw_score():
     score_text = font_small.render("Score: " + str(score), True, TEXT_COLOR)
     screen.blit(score_text, (10, 10))
 
-# Load the game over sound
-game_over_sound = pygame.mixer.Sound(r"C:\Users\Admin\Downloads\game_over.mp3")
-
-# Add this variable to manage if the game over sound has been played
-game_over_sound_played = False
-
 # Main game loop
+game_over_sound_played = False
 clock = pygame.time.Clock()
 while True:
     draw_background()
     draw_road()
 
     if game_over:
-        # Stop background music if it hasn't already been stopped
         pygame.mixer.music.stop()
-
-        # Play game over sound only once
         if not game_over_sound_played:
             game_over_sound.play()
             game_over_sound_played = True
-
         explode()
-        screen.blit(game_over_text,
-                    (WIDTH // 2 - game_over_text.get_width() // 2, HEIGHT // 2 - game_over_text.get_height() // 2))
+        show_game_over_screen()  # Show Game Over screen with Play Again button
     else:
         keys = pygame.key.get_pressed()
-        # Allow the sphere to move within the road boundaries
         if keys[pygame.K_LEFT] and sphere_x > WIDTH // 3 + sphere_radius:
             sphere_x -= sphere_speed
         if keys[pygame.K_RIGHT] and sphere_x < 2 * WIDTH // 3 - sphere_radius:
@@ -184,7 +188,6 @@ while True:
             sphere_y += sphere_speed
 
         draw_sphere(sphere_x, sphere_y, sphere_radius)
-
         frames_since_last_obstacle += 1
         if frames_since_last_obstacle >= obstacle_spawn_rate:
             spawn_obstacle()
