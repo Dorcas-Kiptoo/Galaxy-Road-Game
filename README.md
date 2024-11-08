@@ -40,6 +40,7 @@ The game ends when the sphere collides with an obstacle, triggering an explosion
    - Add `skull.png` in the project directory for the obstacle image.
    - Add `music.mp3` as your background music in the project directory.
    - Add `explosion.wav` as the explosion sound effect in the project directory.
+   - Add `game-over.mp3` as thw game over sound effect
 
 ## How to Run
 Execute the game script using Python:
@@ -54,6 +55,7 @@ galaxy-road-game/
 ├── skull.png                      # Skull image for obstacles
 ├── music.mp3                      # Background music file
 └── Monster battle_audio_explosion.wav # Explosion sound effect
+|__ game-over.mp3 #Game over sound effect
 ```
 
 ## Customization
@@ -83,7 +85,7 @@ galaxy-road-game/
 
 ### Common Issues
 1. **FileNotFoundError**:
-   - Ensure `skull.png`, `music.mp3`, and `explosion.wav` are in the correct directory.
+   - Ensure `skull.png`, `music.mp3`, `game-over.mp3` and `explosion.wav` are in the correct directory.
 
 2. **No Audio Playback**:
    - Verify that the audio files are correctly referenced with their full or relative paths.
