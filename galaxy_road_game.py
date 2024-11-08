@@ -197,7 +197,7 @@ def draw_score():
     screen.blit(score_text, (10, 10))
 
     highest_score_text = font_score.render("Highest: " + str(highest_score).zfill(6), True, TEXT_COLOR)
-    screen.blit(highest_score_text, (10, 50))  # Display below the current score
+    screen.blit(highest_score_text, (10, 50)) 
 
 
 
