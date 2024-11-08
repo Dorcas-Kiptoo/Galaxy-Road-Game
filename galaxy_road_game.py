@@ -38,6 +38,7 @@ game_over_text = font_large.render("Game Over", True, TEXT_COLOR)
 # Game state
 game_over = False
 score = 0
+highest_score = 0  # Initialize highest score
 frames_since_last_obstacle = 0
 
 # Background Star positions for galaxy effect
@@ -57,13 +58,14 @@ lane_positions = [
 ]
 
 # Load sounds
-background_music = r"C:\Users\Admin\Downloads\music.mp3"  # Path to your background music
-explosion_sound = pygame.mixer.Sound(r"C:\Users\Admin\Downloads\explosion.wav")  # Path to your explosion sound
-game_over_sound = pygame.mixer.Sound(r"C:\Users\Admin\Downloads\game_over.mp3")  # Game over sound
+background_music = "music.mp3"
+explosion_sound = pygame.mixer.Sound("explosion.wav")
+game_over_sound = pygame.mixer.Sound("game_over.mp3")
 
 # Play background music (looping)
 pygame.mixer.music.load(background_music)
 pygame.mixer.music.play(-1)  # Loop indefinitely
+
 
 # Function to reset the game state
 def reset_game():
@@ -78,13 +80,29 @@ def reset_game():
     game_over_sound_played = False
     pygame.mixer.music.play(-1)  # Restart background music
 
-# Function to display Game Over screen with score and Play Again button
+
+# Function to update the highest score if needed
+def update_highest_score():
+    global highest_score
+    if score > highest_score:
+        highest_score = score
+
+
+# Function to display Game Over screen with score, highest score, and Play Again button
 def show_game_over_screen():
+    global game_over_sound_played
+    update_highest_score()  # Update highest score on game over
+
+    # Game Over text
     screen.blit(game_over_text, (WIDTH // 2 - game_over_text.get_width() // 2, HEIGHT // 2 - 100))
     score_text = font_small.render(f"Your Score: {score}", True, TEXT_COLOR)
     screen.blit(score_text, (WIDTH // 2 - score_text.get_width() // 2, HEIGHT // 2))
-    
-    # Draw Play Again button
+
+    # highest score
+    highest_score_text = font_small.render(f"Highest Score: {highest_score}", True, TEXT_COLOR)
+    screen.blit(highest_score_text, (WIDTH // 2 - highest_score_text.get_width() // 2, HEIGHT // 2 + 40))
+
+    #Play Again button
     play_again_text = font_small.render("Play Again", True, TEXT_COLOR)
     play_again_rect = play_again_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
     pygame.draw.rect(screen, (0, 150, 0), play_again_rect.inflate(20, 10))
@@ -95,6 +113,7 @@ def show_game_over_screen():
     mouse_click = pygame.mouse.get_pressed()
     if play_again_rect.collidepoint(mouse_pos) and mouse_click[0]:
         reset_game()
+
 
 def draw_background():
     for i in range(HEIGHT):
@@ -107,6 +126,7 @@ def draw_background():
     for pos in star_positions:
         pygame.draw.circle(screen, (255, 255, 255), pos, random.choice([1, 2]))
 
+
 def draw_sphere(x, y, radius):
     for i in range(radius, 0, -2):
         offset_x = random.randint(-2, 2)
@@ -114,14 +134,17 @@ def draw_sphere(x, y, radius):
         color = (255 - int(i * 2.5), 255 - int(i * 2.5), 255 - int(i * 2.5))
         pygame.draw.circle(screen, color, (x + offset_x, y + offset_y), i)
 
+
 def draw_road():
     pygame.draw.rect(screen, ROAD_COLOR, (WIDTH // 3 - 10, 0, WIDTH // 3 + 20, HEIGHT))
     pygame.draw.line(screen, (255, 255, 255), (WIDTH // 3, 0), (WIDTH // 3, HEIGHT), 5)
     pygame.draw.line(screen, (255, 255, 255), (2 * WIDTH // 3, 0), (2 * WIDTH // 3, HEIGHT), 5)
 
+
 def spawn_obstacle():
     lane_x = random.choice(lane_positions)
     obstacles.append([lane_x, -obstacle_height])
+
 
 def move_obstacles():
     global score, obstacles
@@ -132,11 +155,15 @@ def move_obstacles():
         if obstacle[1] > sphere_y + sphere_radius and not game_over:
             score += 1
 
+
 def draw_obstacles():
     for obstacle in obstacles:
         screen.blit(skull_image, (obstacle[0], obstacle[1]))
 
+
 collision_detected = False
+
+
 def detect_collision():
     global game_over, explosion_growing, collision_detected
     sphere_rect = pygame.Rect(sphere_x - sphere_radius, sphere_y - sphere_radius, sphere_radius * 2, sphere_radius * 2)
@@ -150,6 +177,7 @@ def detect_collision():
                 collision_detected = True
             return
 
+
 def explode():
     global explosion_radius, explosion_growing
     if explosion_growing:
@@ -158,9 +186,16 @@ def explode():
             explosion_growing = False
         pygame.draw.circle(screen, (255, 100, 100), (sphere_x, sphere_y), explosion_radius)
 
+
 def draw_score():
+    # Display current score
     score_text = font_small.render("Score: " + str(score), True, TEXT_COLOR)
     screen.blit(score_text, (10, 10))
+
+    # Display highest score
+    highest_score_text = font_small.render("Highest Score: " + str(highest_score), True, TEXT_COLOR)
+    screen.blit(highest_score_text, (10, 50))  # Display below the current score
+
 
 # Main game loop
 game_over_sound_played = False
